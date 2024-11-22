@@ -1,8 +1,8 @@
 
-##Device Management and Task Validation Smart Contract
+## Device Management and Task Validation Smart Contract
 This repository contains the Device Management and Task Validation Smart Contract, written in Solidity. It provides a decentralized system for managing devices, granting/revoking access, task scheduling, and rewarding or penalizing users based on task completion.
 
-Features
+# Features
 1. User Management
 Register Users: Users can register with a unique username and associate their account with an IPFS CID.
 Balance Tracking: Users have a balance that is updated based on rewards/penalties.
