@@ -6,6 +6,16 @@ contract Device {
         address owner; // The owner of the device
         address[] accessList; // List of addresses with access
     }
+      // mutex state variable
+    bool private locked;
+
+    // mutex modifier
+    modifier noReentrant() {
+        require(!locked, "Reentrant call");
+        locked = true;
+        _;
+        locked = false;
+    }
 
     // Mapping to store the CID of a user based on their username
     mapping(string => string) public userToIPFS;
@@ -460,13 +470,26 @@ function getRequestsForUser() public view returns (Request[] memory) {
         }
     }
      
-    function transferTokens(address _from, address _to, uint256 _amount) internal {
-        require(users[_from].balance >= _amount, "Insufficient balance.");
-        users[_from].balance -= _amount;
-        users[_to].balance += _amount;
+     function transferTokens(address _from, address _to, uint256 _amount) internal noReentrant {
+        require(_from != address(0), "Invalid sender address");
+        require(_to != address(0), "Invalid recipient address");
+        require(_amount > 0, "Amount must be greater than 0");
+        require(users[_from].balance >= _amount, "Insufficient balance");
+        
+        // Save current balances
+        uint256 fromBalance = users[_from].balance;
+        uint256 toBalance = users[_to].balance;
+        
+        // Check for integer overflow
+        require(toBalance + _amount >= toBalance, "Integer overflow");
+        
+        // Perform the transfer
+        users[_from].balance = fromBalance - _amount;
+        users[_to].balance = toBalance + _amount;
 
         emit TokensTransferred(_from, _to, _amount);
     }
+
 
     function updateRating(address _username, int256 _ratingChange) internal {
         User storage user = users[_username];
